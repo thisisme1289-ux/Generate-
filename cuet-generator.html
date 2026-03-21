@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUET 2026 Question Bank Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;
+    --accent:#f0c040;--accent2:#40c0f0;--accent3:#f04080;
+    --text:#e8e8f0;--muted:#6060a0;--success:#40f0a0;--error:#f04060;--card:#13131e;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+  .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(240,192,64,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(240,192,64,.025) 1px,transparent 1px);background-size:40px 40px}
+  .bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 600px 400px at 10% 20%,rgba(240,192,64,.06) 0%,transparent 70%),radial-gradient(ellipse 500px 400px at 90% 80%,rgba(64,192,240,.05) 0%,transparent 70%)}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+  header{padding:48px 0 32px;border-bottom:1px solid var(--border);margin-bottom:32px}
+  .header-inner{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px}
+  .logo-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:4px 10px;border-radius:4px;margin-bottom:12px}
+  h1{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,44px);font-weight:800;line-height:1.1;letter-spacing:-.02em}
+  h1 span{color:var(--accent)}
+  .subtitle{margin-top:10px;color:var(--muted);font-size:14px;font-family:'DM Mono',monospace}
+  .stats-bar{display:flex;gap:24px;flex-wrap:wrap}
+  .stat{text-align:right}
+  .stat-n{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);line-height:1}
+  .stat-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:700px){.grid-2{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;position:relative;overflow:hidden}
+  .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.6}
+  .panel-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:18px}
+  label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+  input[type=text],input[type=password],select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:16px}
+  input[type=text]:focus,input[type=password]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,192,64,.1)}
+  select option{background:#1a1a2e}
+  .row{display:flex;gap:12px}
+  .row>*{flex:1}
+  .subject-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+  @media(max-width:480px){.subject-grid{grid-template-columns:1fr 1fr}}
+  .subject-chip{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;transition:all .18s;text-align:center;user-select:none;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted)}
+  .subject-chip:hover{border-color:var(--accent);color:var(--accent)}
+  .subject-chip.active{background:rgba(240,192,64,.12);border-color:var(--accent);color:var(--accent);font-weight:500}
+  .chapter-list{max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface);margin-bottom:16px}
+  .chapter-list::-webkit-scrollbar{width:4px}
+  .chapter-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .chapter-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(30,30,46,.8);cursor:pointer;transition:background .15s}
+  .chapter-item:last-child{border-bottom:none}
+  .chapter-item:hover{background:rgba(240,192,64,.04)}
+  .chapter-item input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);margin:0;flex-shrink:0;margin-bottom:0}
+  .chapter-code{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);min-width:46px}
+  .chapter-name{font-size:12px;color:var(--text);line-height:1.3;flex:1}
+  .ch-saved-badge{font-family:'DM Mono',monospace;font-size:9px;color:var(--success);background:rgba(64,240,160,.1);border:1px solid rgba(64,240,160,.25);border-radius:3px;padding:1px 5px;flex-shrink:0}
+  .select-actions{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .sel-btn{font-size:11px;font-family:"DM Mono",monospace;cursor:pointer;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .18s;white-space:nowrap}
+  .sel-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+  .sel-btn.active{background:rgba(64,192,240,.14);border-color:var(--accent2);color:var(--accent2);font-weight:500}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:none;transition:all .18s;white-space:nowrap}
+  .btn-primary{background:var(--accent);color:#0a0a0f;box-shadow:0 4px 20px rgba(240,192,64,.25)}
+  .btn-primary:hover:not(:disabled){background:#ffd060;box-shadow:0 6px 28px rgba(240,192,64,.4);transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover:not(:disabled){border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+  .btn-secondary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-warn{background:rgba(240,192,64,.12);color:var(--accent);border:1px solid rgba(240,192,64,.3)}
+  .btn-warn:hover:not(:disabled){background:rgba(240,192,64,.22)}
+  .btn-warn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-danger{background:rgba(240,64,96,.15);color:var(--error);border:1px solid rgba(240,64,96,.3)}
+  .btn-danger:hover{background:rgba(240,64,96,.25)}
+  .btn-full{width:100%}
+  .btn-sm{padding:7px 14px;font-size:12px}
+  /* resume banner */
+  #resume-banner{display:none;background:rgba(64,240,160,.07);border:1px solid rgba(64,240,160,.25);border-radius:10px;padding:14px 20px;margin-bottom:20px}
+  .resume-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .resume-text{font-size:13px;color:var(--success)}
+  .resume-text strong{color:var(--text)}
+  .resume-actions{display:flex;gap:8px}
+  /* worker pills */
+  .concurrency-display{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .worker-pill{font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);color:var(--muted);background:var(--surface);transition:all .2s}
+  .worker-pill.busy{border-color:var(--accent);color:var(--accent);background:rgba(240,192,64,.08)}
+  .worker-pill.done{border-color:var(--success);color:var(--success);background:rgba(64,240,160,.06)}
+  /* progress */
+  #progress-section{margin-top:32px}
+  .progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+  .progress-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+  .progress-meta{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+  .progress-bar-wrap{height:6px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border)}
+  .progress-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease;box-shadow:0 0 12px rgba(240,192,64,.5);width:0%}
+  /* status grid */
+  .status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;max-height:360px;overflow-y:auto;padding-right:4px;margin-bottom:16px}
+  .status-grid::-webkit-scrollbar{width:4px}
+  .status-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .ch-status{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;transition:border-color .2s}
+  .ch-status.done{border-color:rgba(64,240,160,.3)}
+  .ch-status.running{border-color:rgba(240,192,64,.5)}
+  .ch-status.failed{border-color:rgba(240,64,96,.3)}
+  .ch-status.pending{opacity:.4}
+  .ch-status.skipped{border-color:rgba(64,192,240,.3)}
+  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .status-dot.done{background:var(--success);box-shadow:0 0 8px var(--success)}
+  .status-dot.running{background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1s ease-in-out infinite}
+  .status-dot.failed{background:var(--error);box-shadow:0 0 8px var(--error)}
+  .status-dot.pending{background:var(--border)}
+  .status-dot.skipped{background:var(--accent2);box-shadow:0 0 8px var(--accent2)}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+  .ch-status-info{flex:1;min-width:0}
+  .ch-status-id{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2)}
+  .ch-status-name{font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ch-status-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:right;flex-shrink:0}
+  /* retry section */
+  #retry-section{display:none;margin-top:16px;padding:16px 20px;background:rgba(240,64,96,.06);border:1px solid rgba(240,64,96,.2);border-radius:10px}
+  .retry-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--error);margin-bottom:10px}
+  .retry-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .retry-chip{font-family:'DM Mono',monospace;font-size:11px;padding:4px 10px;background:rgba(240,64,96,.1);border:1px solid rgba(240,64,96,.25);border-radius:4px;color:var(--error)}
+  /* log */
+  .log-area{background:#06060c;border:1px solid var(--border);border-radius:8px;padding:14px;height:180px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:11px;line-height:1.8}
+  .log-area::-webkit-scrollbar{width:4px}
+  .log-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .log-line{display:block}
+  .log-line.info{color:var(--muted)}
+  .log-line.ok{color:var(--success)}
+  .log-line.warn{color:var(--accent)}
+  .log-line.error{color:var(--error)}
+  .log-line.head{color:var(--accent2)}
+  /* download */
+  #download-section{margin-top:32px;padding:24px;background:linear-gradient(135deg,rgba(64,240,160,.06),rgba(64,192,240,.06));border:1px solid rgba(64,240,160,.2);border-radius:12px;display:none}
+  .download-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--success);margin-bottom:8px}
+  .download-meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+  .download-actions{display:flex;gap:12px;flex-wrap:wrap}
+  /* notice */
+  .notice{background:rgba(64,192,240,.07);border:1px solid rgba(64,192,240,.2);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--accent2);margin-bottom:20px;line-height:1.5}
+  .notice strong{color:var(--text)}
+  /* token bar */
+  .token-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .token-bar span{color:var(--accent);font-weight:500}
+  footer{text-align:center;padding:40px 0 24px;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;border-top:1px solid var(--border);margin-top:60px}
+  footer a{color:var(--accent2);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="container">
+
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="logo-tag">NTA · CUET UG 2026 · Question Bank</div>
+        <h1>CUET <span>Generator</span></h1>
+        <p class="subtitle">// resume · validate · parallel · retry</p>
+      </div>
+      <div class="stats-bar">
+        <div class="stat"><div class="stat-n">85</div><div class="stat-l">Chapters</div></div>
+        <div class="stat"><div class="stat-n">2550</div><div class="stat-l">Questions</div></div>
+        <div class="stat"><div class="stat-n">6</div><div class="stat-l">Subjects</div></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- RESUME BANNER -->
+  <div id="resume-banner">
+    <div class="resume-inner">
+      <div class="resume-text">💾 <strong>Saved session found.</strong> <span id="resume-info"></span></div>
+      <div class="resume-actions">
+        <button class="btn btn-secondary btn-sm" onclick="clearSavedSession()">🗑 Clear</button>
+        <button class="btn btn-primary btn-sm" onclick="resumeSession()">↩ Resume</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- API Config -->
+    <div class="panel">
+      <div class="panel-title">⚙ API Configuration</div>
+      <div class="notice"><strong>Your API key never leaves your browser.</strong> All calls go directly to the AI provider. Progress auto-saves to localStorage — close tab and resume anytime.<br><br>🆓 <strong>SambaNova Cloud is free</strong> — sign up at <a href="https://cloud.sambanova.ai/apis" target="_blank" style="color:var(--accent)">cloud.sambanova.ai/apis</a> to get your free API key.</div>
+      <label>AI Provider</label>
+      <select id="provider">
+        <option value="sambanova">⚡ SambaNova Cloud — FREE (Llama-3.3-70B)</option>
+        <option value="anthropic">Anthropic Claude (claude-sonnet-4-20250514)</option>
+        <option value="openai">OpenAI GPT-4o</option>
+        <option value="google">Google Gemini 1.5 Pro</option>
+        <option value="groq">Groq LLaMA 3.3-70b</option>
+        <option value="openrouter">OpenRouter (Claude sonnet-4-5)</option>
+      </select>
+      <label>API Key</label>
+      <input type="password" id="apiKey" placeholder="Paste your API key here…" autocomplete="off">
+      <label>Custom Model (optional)</label>
+      <input type="text" id="customModel" placeholder="SambaNova: DeepSeek-V3-0324 / DeepSeek-R1-0528 / Qwen3-235B-A22B-Instruct-2507">
+      <div class="row">
+        <div>
+          <label>Concurrent Requests</label>
+          <select id="concurrency">
+            <option value="1">1 (sequential)</option>
+            <option value="2">2 parallel</option>
+            <option value="3" selected>3 parallel</option>
+            <option value="5">5 parallel</option>
+          </select>
+        </div>
+        <div>
+          <label>Delay Between Batches</label>
+          <select id="delay">
+            <option value="500">0.5s</option>
+            <option value="1000">1s</option>
+            <option value="1500" selected>1.5s</option>
+            <option value="2000">2s</option>
+            <option value="3000">3s</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Retry Attempts</label>
+          <select id="retries">
+            <option value="2">2 retries</option>
+            <option value="3" selected>3 retries</option>
+            <option value="5">5 retries</option>
+          </select>
+        </div>
+        <div>
+          <label>Validation Mode</label>
+          <select id="validationMode">
+            <option value="strict">Strict (reject bad)</option>
+            <option value="warn" selected>Warn + save</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+      </div>
+      <div class="token-bar">
+        <span id="totalQDisplay">0</span> questions selected ·
+        est. <span id="estTokens">0</span> tokens ·
+        <span id="savedCount" style="color:var(--success)">0</span> already saved
+      </div>
+    </div>
+
+    <!-- Chapter Selector -->
+    <div class="panel">
+      <div class="panel-title">📚 Select Chapters</div>
+      <div class="subject-grid" id="subjectGrid"></div>
+      <div class="select-actions">
+        <button class="sel-btn" id="btn-all-subject" onclick="toggleAllInSubject(this)">All in subject</button>
+        <button class="sel-btn" id="btn-none-subject" onclick="selectNoneInSubject()">None in subject</button>
+        <button class="sel-btn" id="btn-all85" onclick="toggleAll(this)">All 85</button>
+        <button class="sel-btn" id="btn-unsaved" onclick="selectUnsaved()">Only unsaved</button>
+      </div>
+      <div class="chapter-list" id="chapterList"></div>
+      <button class="btn btn-primary btn-full" id="startBtn" onclick="startGeneration()">▶ Start Generation</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="progress-section" style="display:none">
+    <div class="panel" style="margin-top:0">
+      <div class="progress-header">
+        <div class="progress-title">Generation Progress</div>
+        <div class="progress-meta" id="progressMeta">0 / 0 chapters</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+      <div class="concurrency-display" id="workerPills"></div>
+      <div class="status-grid" id="statusGrid"></div>
+      <div id="retry-section">
+        <div class="retry-title">⚠ Failed Chapters</div>
+        <div class="retry-list" id="retryList"></div>
+        <button class="btn btn-warn btn-sm" onclick="retryFailed()">↺ Retry All Failed</button>
+      </div>
+      <div class="log-area" id="logArea"></div>
+      <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-danger btn-sm" id="stopBtn" onclick="stopGeneration()" disabled>⏹ Stop</button>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('logArea').scrollTop=9999">↓ Scroll Log</button>
+        <button class="btn btn-secondary btn-sm" onclick="clearSavedSession()">🗑 Clear Cache</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD -->
+  <div id="download-section">
+    <div class="download-title">✓ Generation Complete</div>
+    <div class="download-meta" id="downloadMeta"></div>
+    <div class="download-actions">
+      <button class="btn btn-primary" onclick="downloadJSON()">⬇ questions-all.json</button>
+      <button class="btn btn-secondary" onclick="downloadBySubject()">⬇ Per-subject JSONs</button>
+      <button class="btn btn-secondary" onclick="showPreview()">👁 Preview</button>
+    </div>
+  </div>
+
+  <footer>CUET 2026 Browser Generator · Open Source · <a href="https://github.com" target="_blank">GitHub</a> · Questions generated by AI — review before use</footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════════
+const LS_KEY = 'cuet2026_v2';
+const PROVIDER_CONFIG = {
+  sambanova: {model:'Meta-Llama-3.3-70B-Instruct'},
+  anthropic: {model:'claude-sonnet-4-20250514'},
+  openai:    {model:'gpt-4o'},
+  google:    {model:'gemini-1.5-pro'},
+  groq:      {model:'llama-3.3-70b-versatile'},
+  openrouter:{model:'anthropic/claude-sonnet-4-5'},
+};
+const CHAPTER_PASSAGE_CONFIG = {
+  ENG01:{mode:'comprehension',passageType:'factual',      wordsMin:80,wordsMax:120,questionsPerPassage:5},
+  ENG02:{mode:'comprehension',passageType:'literary',     wordsMin:80,wordsMax:120,questionsPerPassage:5},
+  ENG03:{mode:'comprehension',passageType:'narrative',    wordsMin:80,wordsMax:120,questionsPerPassage:5},
+  ECO04:{mode:'data',         passageType:'data_table',   questionsPerPassage:3},
+  ECO06:{mode:'data',         passageType:'data_table',   questionsPerPassage:3},
+  ECO12:{mode:'data',         passageType:'data_table',   questionsPerPassage:3},
+  ECO15:{mode:'data',         passageType:'data_table',   questionsPerPassage:3},
+  ECO17:{mode:'data',         passageType:'data_table',   questionsPerPassage:3},
+  BS03: {mode:'case',         passageType:'case_scenario',questionsPerPassage:3},
+  BS07: {mode:'case',         passageType:'case_scenario',questionsPerPassage:3},
+  BS11: {mode:'case',         passageType:'case_scenario',questionsPerPassage:3},
+};
+const SUBJECTS = {
+  ACC:{code:'301',name:'Accountancy',chapters:[
+    {id:'ACC01',name:'Partnership — Nature, Deed and Capital Accounts'},
+    {id:'ACC02',name:'Division of Profit — P&L Appropriation Account'},
+    {id:'ACC03',name:'Goodwill — Valuation Methods'},
+    {id:'ACC04',name:'Admission of a Partner'},
+    {id:'ACC05',name:'Retirement and Death of a Partner'},
+    {id:'ACC06',name:'Dissolution of Partnership Firm'},
+    {id:'ACC07',name:'Share Capital — Issue and Allotment'},
+    {id:'ACC08',name:'Forfeiture and Reissue of Shares'},
+    {id:'ACC09',name:'Issue and Redemption of Debentures'},
+    {id:'ACC10',name:'Financial Statements of a Company'},
+    {id:'ACC11',name:'Financial Analysis — Comparative Statements'},
+    {id:'ACC12',name:'Accounting Ratios — Liquidity and Solvency'},
+    {id:'ACC13',name:'Accounting Ratios — Activity and Profitability'},
+    {id:'ACC14',name:'Cash Flow Statement'},
+    {id:'ACC15',name:'Computerised Accounting System (CAS)'},
+  ]},
+  BS:{code:'305',name:'Business Studies',chapters:[
+    {id:'BS01',name:'Nature and Significance of Management'},
+    {id:'BS02',name:'Principles of Management — Fayol and Taylor'},
+    {id:'BS03',name:'Business Environment'},
+    {id:'BS04',name:'Planning'},
+    {id:'BS05',name:'Organising and Delegation'},
+    {id:'BS06',name:'Staffing'},
+    {id:'BS07',name:'Directing — Motivation, Leadership, Communication'},
+    {id:'BS08',name:'Controlling'},
+    {id:'BS09',name:'Business Finance and Financial Management'},
+    {id:'BS10',name:'Financial Markets and SEBI'},
+    {id:'BS11',name:'Marketing Management and Marketing Mix'},
+    {id:'BS12',name:'Consumer Protection Act 2019'},
+  ]},
+  ECO:{code:'309',name:'Economics',chapters:[
+    {id:'ECO01',name:'Introduction to Microeconomics'},
+    {id:'ECO02',name:'Consumer Equilibrium — Utility Approach'},
+    {id:'ECO03',name:'Demand, Demand Curve and Determinants'},
+    {id:'ECO04',name:'Price Elasticity of Demand'},
+    {id:'ECO05',name:'Production Function and LVP'},
+    {id:'ECO06',name:'Cost Concepts and Cost Curves'},
+    {id:'ECO07',name:'Revenue Concepts and Producer Equilibrium'},
+    {id:'ECO08',name:'Supply, Elasticity and Market Forms'},
+    {id:'ECO09',name:'Price Determination and Market Equilibrium'},
+    {id:'ECO10',name:'Price Ceiling, Price Floor'},
+    {id:'ECO11',name:'National Income — Concepts and Circular Flow'},
+    {id:'ECO12',name:'National Income — Methods of Measurement'},
+    {id:'ECO13',name:'Money, Banking and Credit Creation'},
+    {id:'ECO14',name:'Central Bank (RBI) and Monetary Policy'},
+    {id:'ECO15',name:'Aggregate Demand and Multiplier'},
+    {id:'ECO16',name:'Excess Demand, Deficient Demand'},
+    {id:'ECO17',name:'Government Budget — Components and Deficits'},
+    {id:'ECO18',name:'Balance of Payments and Foreign Exchange'},
+    {id:'ECO19',name:'Indian Economy 1947-1990'},
+    {id:'ECO20',name:'Economic Reforms Since 1991 — LPG'},
+    {id:'ECO21',name:'Current Challenges — Employment, Environment'},
+    {id:'ECO22',name:'Comparative Development — India, China, Pakistan'},
+  ]},
+  ENG:{code:'101',name:'English',chapters:[
+    {id:'ENG01',name:'Reading Comprehension — Factual Passages'},
+    {id:'ENG02',name:'Reading Comprehension — Literary Passages'},
+    {id:'ENG03',name:'Reading Comprehension — Narrative Passages'},
+    {id:'ENG04',name:'Vocabulary — Synonyms and Antonyms'},
+    {id:'ENG05',name:'Vocabulary — Idioms, Phrases and Word Usage'},
+    {id:'ENG06',name:'Grammar — Tenses and Subject-Verb Agreement'},
+    {id:'ENG07',name:'Grammar — Prepositions, Articles and Conjunctions'},
+    {id:'ENG08',name:'Literary Aptitude — Figures of Speech'},
+    {id:'ENG09',name:'Sentence Rearrangement and Para Jumbles'},
+    {id:'ENG10',name:'Error Spotting and Sentence Correction'},
+  ]},
+  AM:{code:'319',name:'Applied Maths',chapters:[
+    {id:'AM01',name:'Numbers, Quantification and Numerical Applications'},
+    {id:'AM02',name:'Algebra — Matrices and Types'},
+    {id:'AM03',name:'Algebra — Determinants and Applications'},
+    {id:'AM04',name:'Calculus — Differentiation'},
+    {id:'AM05',name:'Calculus — Applications (Marginal Cost, Revenue)'},
+    {id:'AM06',name:'Probability Distributions — Binomial and Bernoulli'},
+    {id:'AM07',name:'Index Numbers and Time-Based Data'},
+    {id:'AM08',name:'Inferential Statistics'},
+    {id:'AM09',name:'Financial Mathematics — Interest'},
+    {id:'AM10',name:'Financial Mathematics — EMI, Annuity'},
+    {id:'AM11',name:'Linear Programming — Graphical Method'},
+  ]},
+  GAT:{code:'501',name:'General Aptitude',chapters:[
+    {id:'GAT01',name:'General Knowledge — Indian History and Culture'},
+    {id:'GAT02',name:'General Knowledge — Indian Geography'},
+    {id:'GAT03',name:'General Knowledge — Indian Polity and Constitution'},
+    {id:'GAT04',name:'General Knowledge — Economy and Development'},
+    {id:'GAT05',name:'Current Affairs — National Events (2024-25)'},
+    {id:'GAT06',name:'Current Affairs — International Events (2024-25)'},
+    {id:'GAT07',name:'General Science — Physics and Chemistry'},
+    {id:'GAT08',name:'General Science — Biology and Environment'},
+    {id:'GAT09',name:'Numerical Ability — Number Systems'},
+    {id:'GAT10',name:'Numerical Ability — Percentage, Profit-Loss'},
+    {id:'GAT11',name:'Quantitative Reasoning — Algebra'},
+    {id:'GAT12',name:'Quantitative Reasoning — Geometry'},
+    {id:'GAT13',name:'Logical Reasoning — Series and Analogies'},
+    {id:'GAT14',name:'Logical Reasoning — Coding and Blood Relations'},
+    {id:'GAT15',name:'Analytical Reasoning — Data Interpretation'},
+  ]},
+};
+const SUBTOPIC_RULES = {
+  ACC01:{mustCover:['Fixed vs Fluctuating capital','Partnership Deed clauses','Interest on capital','Interest on drawings',"Partner's loan"],avoid:['goodwill valuation — in ACC03']},
+  ACC02:{mustCover:['P&L Appropriation Account format',"Manager's commission",'Salary to partners','Reserve transfers','Profit distribution entry'],avoid:['admission/retirement entries']},
+  ACC03:{mustCover:['Average profit method','Super profit method','Capitalization method','Need for goodwill valuation','Hidden goodwill'],avoid:['goodwill write-off — in ACC04']},
+  ACC04:{mustCover:['Sacrificing ratio','New ratio calculation','Revaluation account','Goodwill treatment on admission','Capital adjustment'],avoid:['retirement entries']},
+  ACC05:{mustCover:['Gaining ratio',"Executor's account",'JLP','Revaluation on retirement','Capital settlement'],avoid:['admission topics']},
+  ACC06:{mustCover:['Realisation account','Piecemeal distribution','Garner vs Murray rule','Insolvency of partner','Final settlement entries'],avoid:['topics from earlier chapters']},
+  ACC07:{mustCover:['Types of share capital','Pro-rata allotment','Calls in arrears','Calls in advance','SEBI minimum application'],avoid:['forfeiture — in ACC08']},
+  ACC08:{mustCover:['Forfeiture journal entry','Reissue at discount','Reissue at premium','Capital reserve calculation','Minimum reissue price'],avoid:['allotment entries']},
+  ACC09:{mustCover:['Types of debentures','Issue at discount','Sinking Fund redemption','Debenture interest entry','Debenture as collateral'],avoid:['share capital entries']},
+  ACC10:{mustCover:['P&L format','Balance Sheet format','Appropriations','Finance costs','Exceptional items'],avoid:['ratio calculations']},
+  ACC11:{mustCover:['Comparative statement','Common size percentages','Vertical analysis','Horizontal analysis','Intra vs inter-firm'],avoid:['ratio computation']},
+  ACC12:{mustCover:['Current ratio','Quick ratio','Debt-equity ratio','Proprietary ratio','Interest coverage ratio'],avoid:['activity/profitability ratios']},
+  ACC13:{mustCover:['Inventory turnover','Debtors turnover','Gross profit ratio','Net profit ratio','Return on equity'],avoid:['liquidity ratios']},
+  ACC14:{mustCover:['Operating activities','Investing activities','Financing activities','Indirect method adjustments','Non-cash items'],avoid:['ratio analysis']},
+  ACC15:{mustCover:['Advantages of CAS','MIS reports','Accounting software types','Database concepts','Data security'],avoid:['manual accounting entries']},
+  BS01:{mustCover:['Levels of management','Coordination','Management as profession','Functions of management','Art vs science'],avoid:['Fayol/Taylor — in BS02']},
+  BS02:{mustCover:["All 14 Fayol principles","Taylor's 4 principles",'Differential piece wage','Mental revolution','Fayol vs Taylor'],avoid:['planning/organising functions']},
+  BS03:{mustCover:['PESTLE factors','LPG reforms','Demonetisation','GST','Business opportunities'],avoid:['internal environment']},
+  BS04:{mustCover:['Features of planning','Planning process','Types of plans','MBO','Limitations of planning'],avoid:['organising steps']},
+  BS05:{mustCover:['Formal vs Informal org','Delegation elements','Decentralisation','Scalar chain','Span of management'],avoid:['staffing process']},
+  BS06:{mustCover:['Staffing process steps','Internal vs external recruitment','Selection procedure','Training methods','Performance appraisal'],avoid:['directing concepts']},
+  BS07:{mustCover:["Maslow's hierarchy",'Herzberg theory','Financial vs non-financial incentives','Leadership styles','Barriers to communication'],avoid:['staffing process']},
+  BS08:{mustCover:['Controlling process','Budgetary control','Management by exception','ROI as control','Critical point control'],avoid:['planning vs controlling']},
+  BS09:{mustCover:['Financial planning','Fixed vs working capital','Trading on equity','Capital structure factors','Retained earnings'],avoid:['financial market instruments']},
+  BS10:{mustCover:['Primary vs secondary market','NSE vs BSE','SEBI functions','IPO process','Types of securities'],avoid:['financial management ratios']},
+  BS11:{mustCover:['4Ps of marketing','Product lifecycle','Pricing strategies','Channels of distribution','Labelling vs branding'],avoid:['consumer protection act']},
+  BS12:{mustCover:['6 Consumer rights','Redressal agencies','Who is a consumer','Filing a complaint','Commission jurisdiction'],avoid:['marketing mix']},
+  ECO01:{mustCover:['Central problems','PPC','Opportunity cost','MRT','Types of economies'],avoid:['utility theory']},
+  ECO02:{mustCover:['Law of DMU','Consumer equilibrium','Budget line','Indifference curve','MRS'],avoid:['demand elasticity']},
+  ECO03:{mustCover:['Law of demand','Demand schedule','Determinants','Shift vs movement','Giffen goods'],avoid:['elasticity calculation']},
+  ECO04:{mustCover:['Price elasticity formula','Ed>1 vs Ed<1','Factors affecting elasticity','Total expenditure method','Point and arc elasticity'],avoid:['supply elasticity']},
+  ECO05:{mustCover:['TP/AP/MP relationship','3 stages of LVP','Returns to scale','Fixed vs variable inputs','Production function'],avoid:['cost curves']},
+  ECO06:{mustCover:['Fixed vs variable cost','AC=AFC+AVC','MC and AC relationship','U-shaped AC curve','Explicit vs implicit costs'],avoid:['revenue concepts']},
+  ECO07:{mustCover:['TR/AR/MR','Producer equilibrium MR=MC','Shut-down point','Normal vs supernormal profit','Break-even'],avoid:['market structure analysis']},
+  ECO08:{mustCover:['Law of supply','Supply schedule','Elasticity of supply','Factors affecting supply','Perfect competition'],avoid:['demand analysis']},
+  ECO09:{mustCover:['Market equilibrium','Excess demand/supply','D and S shifts','Stable equilibrium','Price determination'],avoid:['price controls']},
+  ECO10:{mustCover:['Price ceiling','Price floor','Effects on equilibrium','Black market','MSP as price floor'],avoid:['production theory']},
+  ECO11:{mustCover:['GDP vs GNP','NNP vs NDP','National income at factor cost','Circular flow','Transfer payments'],avoid:['measurement methods']},
+  ECO12:{mustCover:['Value added method','Income method','Expenditure method','Precautions','GDP deflator vs CPI'],avoid:['monetary policy']},
+  ECO13:{mustCover:['Functions of money','Credit creation 1/LRR','Types of deposits','Credit controls','Commercial bank balance sheet'],avoid:['RBI functions']},
+  ECO14:{mustCover:['RBI functions','Repo vs reverse repo','CRR and SLR','Open market operations','Quantitative easing'],avoid:['commercial banking']},
+  ECO15:{mustCover:['Consumption function C=a+bY','Multiplier k=1/(1-MPC)','APC vs MPC','Autonomous vs induced investment','Paradox of thrift'],avoid:['IS-LM']},
+  ECO16:{mustCover:['Inflationary gap','Deflationary gap','Full employment level','Fiscal measures','Monetary measures'],avoid:['national income accounting']},
+  ECO17:{mustCover:['Revenue vs capital receipts','Revenue vs capital expenditure','Revenue deficit','Fiscal deficit','Primary deficit'],avoid:['monetary policy']},
+  ECO18:{mustCover:['Current account','Capital account','BOP equilibrium','Fixed vs flexible exchange rate','J-curve'],avoid:['domestic banking']},
+  ECO19:{mustCover:['Pre-1991 planning','Five-year plans','Green Revolution','Industrial policy 1956','MRTP Act'],avoid:['post-1991 reforms']},
+  ECO20:{mustCover:['LPG policy','Disinvestment','WTO membership','FEMA vs FERA','SEZs'],avoid:['pre-1991 policies']},
+  ECO21:{mustCover:['HDI','Types of unemployment','Environmental degradation','Jobless growth','NREGA'],avoid:['comparative development']},
+  ECO22:{mustCover:['India vs China vs Pakistan HDI','GDP growth comparison','Reform strategies','Demographic dividend','One child policy China'],avoid:['domestic Indian economy']},
+  ENG01:{mustCover:['Direct information retrieval','True/False implication','Vocabulary in context',"Author's purpose",'Title/heading inference'],avoid:['literary devices']},
+  ENG02:{mustCover:['Theme identification','Figure of speech','Tone/mood','Inference','Central idea'],avoid:['grammar rules']},
+  ENG03:{mustCover:['Character inference','Plot sequencing','Setting identification',"Narrator's perspective",'Conflict identification'],avoid:['grammar correction']},
+  ENG04:{mustCover:['Synonyms in context','Antonyms','Contextual meaning','Connotation vs denotation','Word pairs affect/effect'],avoid:['idiom usage']},
+  ENG05:{mustCover:['Common idioms','Phrasal verbs','Fixed expressions','Colloquial phrases','Word usage in sentences'],avoid:['formal grammar']},
+  ENG06:{mustCover:['Tense forms','Subject-verb agreement','Collective nouns','Indefinite pronouns','Error identification'],avoid:['preposition rules']},
+  ENG07:{mustCover:['Prepositions time/place/direction','Definite/indefinite articles','Coordinating conjunctions','Subordinating conjunctions','Common errors'],avoid:['tense forms']},
+  ENG08:{mustCover:['Simile vs Metaphor','Personification','Alliteration','Irony and oxymoron','Onomatopoeia'],avoid:['grammar correction']},
+  ENG09:{mustCover:['4-sentence jumbles','Topic sentence identification','Concluding sentence','Logical connectors','PBCQA pattern'],avoid:['vocabulary']},
+  ENG10:{mustCover:['Subject-verb agreement errors','Tense inconsistency','Pronoun-antecedent agreement','Redundancy','Incorrect word choice'],avoid:['comprehension passages']},
+  AM01:{mustCover:['Number systems','HCF and LCM','Ratio and proportion','Percentage calculations','Error estimation'],avoid:['matrix algebra']},
+  AM02:{mustCover:['Order of matrix','Addition/subtraction','Scalar multiplication','Matrix multiplication','Types of matrices'],avoid:['determinants']},
+  AM03:{mustCover:['2x2 and 3x3 determinants','Cofactors and minors','Properties',"Cramer's rule",'Area of triangle'],avoid:['matrix operations']},
+  AM04:{mustCover:['Derivatives of standard functions','Chain rule','Product and quotient rule','Increasing/decreasing','Second order derivatives'],avoid:['integration']},
+  AM05:{mustCover:['Marginal cost dC/dx','Marginal revenue dR/dx','Maxima/minima in business','Break-even','Elasticity of demand'],avoid:['pure calculus theory']},
+  AM06:{mustCover:['Bernoulli trial conditions','Binomial P(X=r)','Mean np','Variance npq','Practical problems'],avoid:['continuous distributions']},
+  AM07:{mustCover:["Laspeyre's and Paasche's index","Fisher's ideal index",'CPI','WPI','Index construction'],avoid:['time series forecasting']},
+  AM08:{mustCover:['Mean median mode','SD and variance','Karl Pearson correlation',"Spearman's rank",'Interpretation of r'],avoid:['regression analysis']},
+  AM09:{mustCover:['Simple interest','Compound interest','Effective rate','Depreciation reducing balance','Growth and decay'],avoid:['EMI calculations']},
+  AM10:{mustCover:['EMI formula','PV of annuity','FV of annuity','Sinking fund','Loan amortization'],avoid:['simple/compound interest']},
+  AM11:{mustCover:['Formulation of LPP','Graphical method corner point','Feasible region','Objective function','Unbounded/infeasible solutions'],avoid:['simplex method']},
+  GAT01:{mustCover:['Indus Valley facts','Mughal empire','Freedom movement','Cultural heritage','Important personalities'],avoid:['current affairs']},
+  GAT02:{mustCover:['Physical features','Soil types','Climate zones','National parks','Agricultural patterns'],avoid:['economic geography']},
+  GAT03:{mustCover:['Fundamental Rights 12-35','Directive Principles','Major amendments','Parliament vs State','Election Commission'],avoid:['economic policies']},
+  GAT04:{mustCover:['GDP concepts','Five Year Plans','Poverty line','Economic indicators','Recent budget highlights'],avoid:['polity topics']},
+  GAT05:{mustCover:['2024 General Election','Major schemes 2024-25','Awards Padma/Bharat Ratna','Infrastructure milestones','Sports achievements'],avoid:['international events']},
+  GAT06:{mustCover:['UN Security Council','G20/G7 2024-25','International conflicts','COP agreements','Nobel Prize 2024'],avoid:['Indian domestic events']},
+  GAT07:{mustCover:["Newton's laws","Ohm's law",'Chemical bonding','Periodic table trends','Common elements'],avoid:['biology topics']},
+  GAT08:{mustCover:['Cell theory','Photosynthesis','Human body systems','Ecosystem','Biodiversity'],avoid:['physics/chemistry']},
+  GAT09:{mustCover:['LCM/HCF word problems','Divisibility rules','Number series','BODMAS','Fractions and decimals'],avoid:['algebra equations']},
+  GAT10:{mustCover:['Percentage increase/decrease','Profit and loss','Simple ratio','Proportion','Time-speed-distance'],avoid:['geometry']},
+  GAT11:{mustCover:['Linear equations','Simple quadratic','Age-based problems','Work and time','Pipes and cisterns'],avoid:['geometry']},
+  GAT12:{mustCover:['Area and perimeter','Volume','Pythagoras theorem','Similar triangles','Coordinate geometry basics'],avoid:['algebra']},
+  GAT13:{mustCover:['Number series','Alphabetical series','Letter analogies','Number analogies','Odd one out'],avoid:['coding decoding']},
+  GAT14:{mustCover:['Letter coding','Coded operations','Blood relations','Family tree','Direction sense'],avoid:['series questions']},
+  GAT15:{mustCover:['Table DI','Bar chart/pie chart','Venn diagram','Syllogisms','Seating arrangement'],avoid:['series/analogies']},
+};
+const PY_EXAMPLES=`--- DEFINITION/CONCEPTUAL ---
+Q: Which of the following is NOT a feature of a partnership firm?
+(A) Mutual agency  (B) Unlimited liability  (C) Perpetual succession  (D) Profit sharing
+Answer: C
+Explanation: Perpetual succession is a feature of a company, not a partnership firm.
+
+--- NUMERICAL ---
+Q: X and Y share profits 3:2. Z admitted for 1/5th share. New ratio will be:
+(A) 12:8:5  (B) 12:8:4  (C) 3:2:1  (D) 4:3:2
+Answer: A
+Explanation: Remaining 4/5 split 3:2 among X and Y. X=12/25, Y=8/25, Z=5/25. Ratio = 12:8:5.
+
+--- NOT-TYPE ---
+Q: Which of the following is NOT a principle of management given by Henri Fayol?
+(A) Division of Work  (B) Unity of Command  (C) Science not Rule of Thumb  (D) Esprit de Corps
+Answer: C
+Explanation: "Science not Rule of Thumb" is Taylor's principle, not Fayol's.
+
+--- ASSERTION-REASON ---
+Assertion (A): The Reserve Bank of India is the lender of last resort.
+Reason (R): Commercial banks borrow from RBI when they face a liquidity crisis.
+(A) Both A and R are true, and R is the correct explanation of A
+(B) Both A and R are true, but R is NOT the correct explanation of A
+(C) A is true but R is false
+(D) A is false but R is true
+Answer: A
+Explanation: RBI provides emergency funds to banks — making it the lender of last resort.
+
+--- FILL IN THE BLANK ---
+Q: The minimum number of members to form a public company is ______.
+(A) 2  (B) 5  (C) 7  (D) 10
+Answer: C
+
+--- SEQUENCE/MATCH ---
+Q: Arrange staffing steps in correct order: 1.Recruitment 2.Manpower planning 3.Selection 4.Training
+(A) 2-1-3-4  (B) 1-2-3-4  (C) 2-3-1-4  (D) 1-3-2-4
+Answer: A
+
+--- COMPREHENSION ---
+PASSAGE: "The Industrial Revolution, which began in Britain in the late 18th century, transformed manufacturing dramatically. Steam-powered machinery replaced manual labour in textile mills, leading to mass production. This shift caused large-scale migration from rural areas to cities, creating new social classes."
+Q: According to the passage, what was one consequence of the Industrial Revolution?
+(A) Decline of steam-powered machinery  (B) Migration from cities to rural areas
+(C) Emergence of new social classes     (D) Reduction in factory production
+Answer: C
+
+--- DATA-BASED ---
+DATA:
+| Good | Price Change (Rs) | Quantity Change |
+|------|-------------------|-----------------|
+| X    | 10 to 12          | 100 to 80       |
+| Y    | 20 to 22          | 200 to 196      |
+Q: Which good has more elastic demand?
+(A) Good X  (B) Good Y  (C) Both equal  (D) Cannot be determined
+Answer: A
+
+--- CASE-SCENARIO ---
+SCENARIO: "Ramesh is a production manager at a textile company. He notices workers waste time deciding which task to do next. He assigns each worker one specific task and trains them to master it. Output increases by 40%."
+Q: Which principle of management is Ramesh applying?
+(A) Unity of Command  (B) Division of Work  (C) Esprit de Corps  (D) Order
+Answer: B`;
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let selectedSubject='ACC', checkedChapters=new Set();
+let generatedData={}, failedChapters=[];
+let stopFlag=false, isRunning=false, statusEls={};
+
+// ══════════════════════════════════════════════════════════════
+// #1 — LOCALSTORAGE / RESUME
+// ══════════════════════════════════════════════════════════════
+function lsSave(chId,qs){try{const s=JSON.parse(localStorage.getItem(LS_KEY)||'{}');s[chId]=qs;localStorage.setItem(LS_KEY,JSON.stringify(s));}catch(e){}}
+function lsLoad(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}')}catch(e){return {}}}
+function lsClear(){localStorage.removeItem(LS_KEY);generatedData={};}
+function getSavedCount(){return Object.keys(lsLoad()).length}
+
+function checkResumeBanner(){
+  const saved=lsLoad(), n=Object.keys(saved).length;
+  const banner=document.getElementById('resume-banner');
+  if(n>0){
+    const tq=Object.values(saved).reduce((s,a)=>s+a.length,0);
+    document.getElementById('resume-info').textContent=` ${n} chapters (${tq} questions) saved from a previous session.`;
+    banner.style.display='block';
+  } else banner.style.display='none';
+  document.getElementById('savedCount').textContent=n;
+}
+function resumeSession(){
+  generatedData=lsLoad();
+  checkResumeBanner(); buildChapterList(); updateTokenEstimate();
+  const tq=Object.values(generatedData).reduce((s,a)=>s+a.length,0);
+  if(tq>0){
+    document.getElementById('download-section').style.display='block';
+    document.getElementById('downloadMeta').textContent=`${Object.keys(generatedData).length} chapters · ${tq} questions loaded from cache`;
+    document.getElementById('progress-section').style.display='block';
+    addLog(`Session restored — ${Object.keys(generatedData).length} chapters loaded.`,'ok');
+  }
+}
+function clearSavedSession(){
+  if(!confirm('Clear all saved progress? This cannot be undone.'))return;
+  lsClear(); checkResumeBanner(); buildChapterList(); updateTokenEstimate();
+  document.getElementById('download-section').style.display='none';
+  addLog('Cache cleared.','warn');
+}
+
+// ══════════════════════════════════════════════════════════════
+// #2 — VALIDATION
+// ══════════════════════════════════════════════════════════════
+function validateBatch(questions,chId){
+  const errors=[],warnings=[];
+  const pcfg=CHAPTER_PASSAGE_CONFIG[chId];
+  if(!Array.isArray(questions))return{errors:['Response is not a JSON array'],warnings};
+  if(questions.length<25)errors.push(`Only ${questions.length} questions returned (need ≥25)`);
+
+  if(pcfg&&pcfg.mode==='comprehension'){
+    questions.forEach((q,i)=>{
+      if(!q.passage||q.passage.trim().length<50)errors.push(`Q${i+1}: passage missing or too short`);
+      if(!q.passage_id)errors.push(`Q${i+1}: passage_id missing`);
+    });
+    const groups={};
+    questions.forEach(q=>{if(q.passage_id)groups[q.passage_id]=(groups[q.passage_id]||0)+1;});
+    Object.entries(groups).forEach(([pid,count])=>{if(count<2)errors.push(`passage_id '${pid}' has only ${count} question`);});
+    const ptexts={};
+    questions.forEach((q,i)=>{
+      if(!q.passage_id)return;
+      if(!ptexts[q.passage_id])ptexts[q.passage_id]=q.passage;
+      else if(ptexts[q.passage_id]!==q.passage)warnings.push(`Q${i+1}: passage text inconsistent in group '${q.passage_id}'`);
+    });
+  }
+  if(pcfg&&(pcfg.mode==='data'||pcfg.mode==='case')){
+    questions.forEach((q,i)=>{if(q.passage_id&&(!q.passage||q.passage.trim().length<30))errors.push(`Q${i+1}: has passage_id but passage is empty`);});
+  }
+
+  const validTypes=['definition','numerical','not_type','assertion_reason','fill_blank','sequence','comprehension'];
+  questions.forEach((q,i)=>{
+    const n=`Q${String(i+1).padStart(2,'0')}`;
+    if(!validTypes.includes(q.type))errors.push(`${n}: invalid type '${q.type}'`);
+    if(!['L1','L2','L3'].includes(q.level))warnings.push(`${n}: invalid level '${q.level}'`);
+    if(!q.question||q.question.trim().length<20)errors.push(`${n}: question text too short`);
+    if(!Array.isArray(q.options)||q.options.length!==4)errors.push(`${n}: must have exactly 4 options`);
+    if(typeof q.correct!=='number'||![0,1,2,3].includes(q.correct))errors.push(`${n}: 'correct' must be integer 0-3 (got ${JSON.stringify(q.correct)})`);
+    if(!q.explanation||q.explanation.trim().length<30)warnings.push(`${n}: explanation too short`);
+    if(q.type==='not_type'&&!q.question.toUpperCase().includes('NOT'))errors.push(`${n}: not_type missing 'NOT'`);
+    if(q.type==='assertion_reason'){
+      if(!q.question.includes('Assertion (A)')||!q.question.includes('Reason (R)'))errors.push(`${n}: assertion_reason missing format`);
+    }
+    if(q.type==='numerical'&&!/\d/.test(q.question))warnings.push(`${n}: numerical has no numbers`);
+  });
+
+  const texts=questions.map(q=>(q.question||'').trim().toLowerCase().slice(0,60));
+  texts.forEach((t,i)=>{if(texts.indexOf(t)!==i)errors.push(`Q${i+1}: duplicate question`);});
+  return{errors,warnings};
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROMPT BUILDER
+// ══════════════════════════════════════════════════════════════
+function buildPrompt(subjectKey,ch){
+  const subj=SUBJECTS[subjectKey];
+  const rules=SUBTOPIC_RULES[ch.id]||{mustCover:['All core concepts'],avoid:['topics from other chapters']};
+  const pcfg=CHAPTER_PASSAGE_CONFIG[ch.id];
+  const mc=rules.mustCover.map(t=>'  - '+t).join('\n');
+  const av=rules.avoid.map(t=>'  - '+t).join('\n');
+  let pb='';
+  if(pcfg&&pcfg.mode==='comprehension'){
+    const np=Math.round(30/pcfg.questionsPerPassage);
+    pb=`\nPASSAGE-BASED QUESTION RULES (MANDATORY):
+- Generate exactly ${np} distinct ${pcfg.passageType} passages, each ${pcfg.wordsMin}-${pcfg.wordsMax} words
+- Each passage must be followed by exactly ${pcfg.questionsPerPassage} questions answerable from the passage alone
+- Every question MUST include: "passage_id", "passage" (full text), "passage_type":"${pcfg.passageType}"
+- Questions sharing a passage MUST have the SAME passage_id (e.g. "${ch.id}-P1", "${ch.id}-P2"...)
+- The "passage" field MUST contain the full passage text in EVERY question that uses it
+- Passage must NOT reference any specific published book, poem, or article
+- Question type for all these = "comprehension"`;
+  }
+  if(pcfg&&pcfg.mode==='data'){
+    pb=`\nDATA-BASED QUESTION RULES:
+- Generate at least 3 data tables with actual numbers relevant to this chapter
+- Each data set must have ${pcfg.questionsPerPassage} questions that REQUIRE reading the data
+- Data questions MUST include: "passage_id" (e.g."${ch.id}-D1"), "passage" (full table), "passage_type":"data_table"
+- Write tables in markdown pipe format with actual numbers
+- Regular questions: omit passage_id, passage, passage_type entirely`;
+  }
+  if(pcfg&&pcfg.mode==='case'){
+    pb=`\nCASE-SCENARIO QUESTION RULES:
+- Generate at least 3 business scenarios (3-5 sentences each, name a real person/company)
+- Each scenario must have ${pcfg.questionsPerPassage} questions that REQUIRE reading the scenario
+- Scenario questions MUST include: "passage_id" (e.g."${ch.id}-C1"), "passage" (full scenario), "passage_type":"case_scenario"
+- Regular questions: omit passage_id, passage, passage_type entirely`;
+  }
+  return `You are an expert CUET UG 2026 question creator following OFFICIAL NTA guidelines.
+
+SUBJECT: ${subj.name} (Code: ${subj.code})
+CHAPTER: ${ch.id} — ${ch.name}
+
+NTA EXAM PATTERN (CUET 2026):
++5 correct | -1 wrong | 0 unattempted | 50 MCQs | 60 min | CBT | NCERT Class 11-12
+
+PREVIOUS YEAR CUET STYLE (MIMIC THIS EXACTLY):
+${PY_EXAMPLES}
+${pb}
+
+SUB-TOPIC COVERAGE FOR ${ch.id}:
+MUST COVER (spread questions across ALL of these):
+${mc}
+
+DO NOT INCLUDE (belong to other chapters):
+${av}
+
+DISTRIBUTION (30 questions total):
+~8 definition | ~8 numerical | ~5 not_type | ~4 assertion_reason | ~3 fill_blank | ~2 sequence
+
+VALIDATION RULES (strictly enforced):
+1. assertion_reason options MUST be exactly these 4 in this order:
+   "Both A and R are true, and R is the correct explanation of A"
+   "Both A and R are true, but R is NOT the correct explanation of A"
+   "A is true but R is false"
+   "A is false but R is true"
+2. not_type question text MUST contain "NOT" (uppercase)
+3. numerical question MUST contain actual numbers
+4. "correct" MUST be integer 0, 1, 2, or 3 — NEVER a string
+5. explanation MUST be at least 40 words
+6. No duplicate questions
+
+Return ONLY a valid JSON array of exactly 30 objects. No markdown. Start with [ end with ].
+Each object:
+  "id"          : "${ch.id}Q01" through "${ch.id}Q30"
+  "type"        : "definition"|"numerical"|"not_type"|"assertion_reason"|"fill_blank"|"sequence"|"comprehension"
+  "level"       : "L1"|"L2"|"L3"
+  "difficulty"  : "easy"|"medium"|"hard"
+  "subtopic"    : specific sub-topic from the MUST COVER list
+  "passage_id"  : (only if has passage)
+  "passage"     : (only if has passage) full text
+  "passage_type": (only if has passage)
+  "question"    : full question text
+  "options"     : array of exactly 4 strings
+  "correct"     : integer 0, 1, 2, or 3
+  "explanation" : detailed explanation, minimum 40 words`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// API CALL
+// ══════════════════════════════════════════════════════════════
+async function callAPI(provider,apiKey,model,prompt){
+  let url,headers,body,getText;
+  if(provider==='sambanova'){
+    url='https://api.sambanova.ai/v1/chat/completions';
+    headers={'Content-Type':'application/json','Authorization':'Bearer '+apiKey};
+    body=JSON.stringify({model,max_tokens:8000,messages:[{role:'user',content:prompt}]});
+    getText=d=>d.choices?.[0]?.message?.content||'';
+  } else if(provider==='anthropic'){
+    url='https://api.anthropic.com/v1/messages';
+    headers={'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+    body=JSON.stringify({model,max_tokens:8000,messages:[{role:'user',content:prompt}]});
+    getText=d=>d.content?.find(b=>b.type==='text')?.text||'';
+  } else if(provider==='openai'){
+    url='https://api.openai.com/v1/chat/completions';
+    headers={'Content-Type':'application/json','Authorization':'Bearer '+apiKey};
+    body=JSON.stringify({model,max_tokens:8000,messages:[{role:'user',content:prompt}]});
+    getText=d=>d.choices?.[0]?.message?.content||'';
+  } else if(provider==='google'){
+    url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    headers={'Content-Type':'application/json'};
+    body=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8000}});
+    getText=d=>d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  } else if(provider==='groq'){
+    url='https://api.groq.com/openai/v1/chat/completions';
+    headers={'Content-Type':'application/json','Authorization':'Bearer '+apiKey};
+    body=JSON.stringify({model,max_tokens:8000,messages:[{role:'user',content:prompt}]});
+    getText=d=>d.choices?.[0]?.message?.content||'';
+  } else if(provider==='openrouter'){
+    url='https://openrouter.ai/api/v1/chat/completions';
+    headers={'Content-Type':'application/json','Authorization':'Bearer '+apiKey,'HTTP-Referer':'https://cpl.app'};
+    body=JSON.stringify({model,max_tokens:8000,messages:[{role:'user',content:prompt}]});
+    getText=d=>d.choices?.[0]?.message?.content||'';
+  }
+  const res=await fetch(url,{method:'POST',headers,body});
+  if(res.status===429){const e=new Error('RATE_LIMIT');e.isRateLimit=true;throw e;}
+  if(!res.ok){const ed=await res.json().catch(()=>({}));throw new Error(ed.error?.message||ed.message||'HTTP '+res.status);}
+  const data=await res.json();
+  const text=getText(data);
+  const clean=text.replace(/```json|```/g,'').trim();
+  const s=clean.indexOf('['),e=clean.lastIndexOf(']');
+  if(s===-1||e===-1)throw new Error('No JSON array in response');
+  const arr=JSON.parse(clean.slice(s,e+1));
+  if(!Array.isArray(arr)||arr.length===0)throw new Error('Empty array returned');
+  return arr;
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI
+// ══════════════════════════════════════════════════════════════
+function addLog(msg,type='info'){
+  const area=document.getElementById('logArea');
+  const line=document.createElement('span');
+  line.className='log-line '+type;
+  line.textContent='['+new Date().toLocaleTimeString()+'] '+msg;
+  area.appendChild(line);area.appendChild(document.createElement('br'));
+  area.scrollTop=area.scrollHeight;
+}
+function buildStatusGrid(chapters){
+  const grid=document.getElementById('statusGrid');
+  grid.innerHTML='';statusEls={};
+  for(const ch of chapters){
+    const saved=!!generatedData[ch.id];
+    const el=document.createElement('div');
+    el.className='ch-status '+(saved?'done':'pending');
+    el.innerHTML=`<div class="status-dot ${saved?'done':'pending'}" id="dot-${ch.id}"></div>
+      <div class="ch-status-info"><div class="chapter-code">${ch.id}</div><div class="ch-status-name">${ch.name}</div></div>
+      <div class="ch-status-count" id="cnt-${ch.id}">${saved?generatedData[ch.id].length+'Q':'—'}</div>`;
+    grid.appendChild(el);statusEls[ch.id]=el;
+  }
+}
+function setStatus(chId,state,count){
+  const el=statusEls[chId];if(!el)return;
+  el.className='ch-status '+state;
+  const dot=document.getElementById('dot-'+chId);if(dot)dot.className='status-dot '+state;
+  const cnt=document.getElementById('cnt-'+chId);if(cnt&&count!==undefined)cnt.textContent=count+'Q';
+}
+function setProgress(done,total){
+  const pct=total>0?(done/total*100).toFixed(1):0;
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressMeta').textContent=`${done} / ${total} chapters · ${pct}%`;
+}
+function buildWorkerPills(n){
+  const wrap=document.getElementById('workerPills');wrap.innerHTML='';
+  for(let i=0;i<n;i++){const p=document.createElement('div');p.className='worker-pill';p.id='worker-'+i;p.textContent='W'+(i+1)+': idle';wrap.appendChild(p);}
+}
+function setWorker(i,state,label){const el=document.getElementById('worker-'+i);if(!el)return;el.className='worker-pill '+state;el.textContent='W'+(i+1)+': '+label;}
+function updateRetrySection(){
+  const sec=document.getElementById('retry-section'),list=document.getElementById('retryList');
+  if(failedChapters.length===0){sec.style.display='none';return;}
+  sec.style.display='block';
+  list.innerHTML=failedChapters.map(f=>`<span class="retry-chip" title="${f.error||''}">${f.ch.id}</span>`).join('');
+}
+function buildSubjectGrid(){
+  const grid=document.getElementById('subjectGrid');grid.innerHTML='';
+  for(const [key,subj] of Object.entries(SUBJECTS)){
+    const chip=document.createElement('div');
+    chip.className='subject-chip'+(key===selectedSubject?' active':'');
+    chip.textContent=subj.name;
+    chip.onclick=()=>{selectedSubject=key;buildSubjectGrid();buildChapterList();updateSelBtnStates();};
+    grid.appendChild(chip);
+  }
+}
+function buildChapterList(){
+  const list=document.getElementById('chapterList');list.innerHTML='';
+  const saved=lsLoad();
+  for(const ch of SUBJECTS[selectedSubject].chapters){
+    const isSaved=!!saved[ch.id];
+    const row=document.createElement('div');row.className='chapter-item';
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=checkedChapters.has(ch.id);
+    cb.onchange=()=>{if(cb.checked)checkedChapters.add(ch.id);else checkedChapters.delete(ch.id);updateTokenEstimate();updateSelBtnStates();};
+    const code=document.createElement('span');code.className='chapter-code';code.textContent=ch.id;
+    const name=document.createElement('span');name.className='chapter-name';name.textContent=ch.name;
+    row.appendChild(cb);row.appendChild(code);row.appendChild(name);
+    if(isSaved){const b=document.createElement('span');b.className='ch-saved-badge';b.textContent='✓ saved';row.appendChild(b);}
+    row.onclick=e=>{if(e.target!==cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change'));}};
+    list.appendChild(row);
+  }
+}
+function updateSelBtnStates(){
+  // All in subject toggle
+  const subjChs=SUBJECTS[selectedSubject].chapters;
+  const allInSubjSelected=subjChs.every(ch=>checkedChapters.has(ch.id));
+  const btnSubj=document.getElementById('btn-all-subject');
+  if(btnSubj){btnSubj.classList.toggle('active',allInSubjSelected);btnSubj.textContent=allInSubjSelected?'✓ All in subject':'All in subject';}
+  // All 85 toggle
+  const allChs=Object.values(SUBJECTS).flatMap(s=>s.chapters);
+  const all85Selected=allChs.every(ch=>checkedChapters.has(ch.id));
+  const btn85=document.getElementById('btn-all85');
+  if(btn85){btn85.classList.toggle('active',all85Selected);btn85.textContent=all85Selected?'✓ All 85':'All 85';}
+}
+function toggleAllInSubject(btn){
+  const chs=SUBJECTS[selectedSubject].chapters;
+  const allSelected=chs.every(ch=>checkedChapters.has(ch.id));
+  if(allSelected){chs.forEach(ch=>checkedChapters.delete(ch.id));}
+  else{chs.forEach(ch=>checkedChapters.add(ch.id));}
+  buildChapterList();updateTokenEstimate();updateSelBtnStates();
+}
+function selectAllInSubject(){
+  SUBJECTS[selectedSubject].chapters.forEach(ch=>checkedChapters.add(ch.id));
+  buildChapterList();updateTokenEstimate();updateSelBtnStates();
+}
+function selectNoneInSubject(){
+  SUBJECTS[selectedSubject].chapters.forEach(ch=>checkedChapters.delete(ch.id));
+  buildChapterList();updateTokenEstimate();updateSelBtnStates();
+}
+function toggleAll(btn){
+  const allChs=Object.values(SUBJECTS).flatMap(s=>s.chapters);
+  const allSelected=allChs.every(ch=>checkedChapters.has(ch.id));
+  if(allSelected){checkedChapters.clear();}
+  else{allChs.forEach(ch=>checkedChapters.add(ch.id));}
+  buildChapterList();updateTokenEstimate();updateSelBtnStates();
+}
+function selectAll(){
+  Object.values(SUBJECTS).forEach(s=>s.chapters.forEach(ch=>checkedChapters.add(ch.id)));
+  buildChapterList();updateTokenEstimate();updateSelBtnStates();
+}
+function selectUnsaved(){
+  const saved=lsLoad();checkedChapters.clear();
+  Object.values(SUBJECTS).forEach(s=>s.chapters.forEach(ch=>{if(!saved[ch.id])checkedChapters.add(ch.id);}));
+  buildChapterList();updateTokenEstimate();updateSelBtnStates();
+}
+function updateTokenEstimate(){
+  const n=checkedChapters.size;
+  document.getElementById('totalQDisplay').textContent=n*30;
+  document.getElementById('estTokens').textContent=(n*8500).toLocaleString();
+  document.getElementById('savedCount').textContent=getSavedCount();
+}
+
+// ══════════════════════════════════════════════════════════════
+// #3 — MAIN GENERATION WITH CONCURRENCY
+// ══════════════════════════════════════════════════════════════
+async function processChapter(ch,provider,apiKey,model,maxRetries,valMode,workerIdx){
+  let questions=null,lastError=null;
+  for(let attempt=1;attempt<=maxRetries;attempt++){
+    if(stopFlag)break;
+    try{
+      questions=await callAPI(provider,apiKey,model,buildPrompt(ch.subjKey,ch));
+      if(valMode!=='off'){
+        const{errors,warnings}=validateBatch(questions,ch.id);
+        if(warnings.length>0)warnings.forEach(w=>addLog(`  [${ch.id}] ⚠ ${w}`,'warn'));
+        if(errors.length>0){
+          if(valMode==='strict'){
+            const msg=`Validation: ${errors.length} errors — ${errors[0]}`;
+            if(attempt<maxRetries){addLog(`  [${ch.id}] ${msg} — retrying…`,'warn');await sleep(3000*attempt);questions=null;lastError=new Error(msg);continue;}
+            else{lastError=new Error(msg);questions=null;}
+          } else {
+            errors.forEach(e=>addLog(`  [${ch.id}] ✗ ${e}`,'warn'));
+          }
+        }
+      }
+      break;
+    }catch(err){
+      lastError=err;
+      if(err.isRateLimit){addLog(`  [${ch.id}] Rate limit. Waiting 60s…`,'warn');await sleep(60000);}
+      else if(attempt<maxRetries){addLog(`  [${ch.id}] Attempt ${attempt} failed: ${err.message}. Retry in ${3*attempt}s…`,'warn');await sleep(3000*attempt);}
+    }
+  }
+  return{ch,workerIdx,questions,lastError};
+}
+
+async function startGeneration(){
+  const apiKey=document.getElementById('apiKey').value.trim();
+  if(!apiKey){alert('Please enter your API key.');return;}
+  if(checkedChapters.size===0){alert('Please select at least one chapter.');return;}
+
+  const provider=document.getElementById('provider').value;
+  const customModel=document.getElementById('customModel').value.trim();
+  const model=customModel||PROVIDER_CONFIG[provider].model;
+  const delay=parseInt(document.getElementById('delay').value);
+  const maxRetries=parseInt(document.getElementById('retries').value);
+  const concurrency=parseInt(document.getElementById('concurrency').value);
+  const valMode=document.getElementById('validationMode').value;
+
+  // Load saved
+  const saved=lsLoad();Object.assign(generatedData,saved);
+
+  // Build todo — skip already saved
+  const todo=[];
+  for(const[subjKey,subj]of Object.entries(SUBJECTS))
+    for(const ch of subj.chapters)
+      if(checkedChapters.has(ch.id)&&!generatedData[ch.id])
+        todo.push({subjKey,...ch,subjectName:subj.name});
+
+  const skippedIds=[...checkedChapters].filter(id=>generatedData[id]);
+  isRunning=true;stopFlag=false;failedChapters=[];
+  document.getElementById('startBtn').disabled=true;
+  document.getElementById('stopBtn').disabled=false;
+  document.getElementById('progress-section').style.display='block';
+  document.getElementById('download-section').style.display='none';
+  document.getElementById('logArea').innerHTML='';
+
+  const allSelected=[];
+  for(const[subjKey,subj]of Object.entries(SUBJECTS))
+    for(const ch of subj.chapters)
+      if(checkedChapters.has(ch.id))allSelected.push({subjKey,...ch});
+
+  buildStatusGrid(allSelected);
+  buildWorkerPills(concurrency);
+  setProgress(skippedIds.length,allSelected.length);
+
+  addLog('━━━ CUET 2026 Generator v2 ━━━','head');
+  addLog(`Provider: ${provider} | Model: ${model} | Workers: ${concurrency} | Validation: ${valMode}`,'head');
+  addLog(`Selected: ${allSelected.length} | Saved (skip): ${skippedIds.length} | To generate: ${todo.length}`,'head');
+  skippedIds.forEach(id=>setStatus(id,'skipped'));
+
+  if(todo.length===0){addLog('All chapters already saved!','ok');showDownload();document.getElementById('startBtn').disabled=false;isRunning=false;return;}
+
+  let completedCount=skippedIds.length;
+
+  // ── #3 CONCURRENT BATCHES ──
+  for(let b=0;b<todo.length;b+=concurrency){
+    if(stopFlag){addLog('Stopped by user.','warn');break;}
+    const batch=todo.slice(b,b+concurrency);
+
+    batch.forEach((ch,wi)=>{
+      setStatus(ch.id,'running');
+      setWorker(wi,'busy',ch.id);
+      addLog(`[${b+wi+1}/${todo.length}] ${ch.id} — ${ch.name}`,'info');
+    });
+
+    const results=await Promise.all(batch.map((ch,wi)=>processChapter(ch,provider,apiKey,model,maxRetries,valMode,wi)));
+
+    for(const{ch,workerIdx,questions,lastError}of results){
+      setWorker(workerIdx,'done',ch.id+(questions?'✓':'✗'));
+      if(!questions){
+        addLog(`  [${ch.id}] FAILED: ${lastError?.message}`,'error');
+        setStatus(ch.id,'failed');
+        failedChapters.push({ch,error:lastError?.message});
+      } else {
+        generatedData[ch.id]=questions;
+        lsSave(ch.id,questions);   // ← auto-save to localStorage
+        addLog(`  [${ch.id}] ✓ ${questions.length}Q saved`,'ok');
+        setStatus(ch.id,'done',questions.length);
+        completedCount++;
+      }
+    }
+
+    setProgress(completedCount,allSelected.length);
+    updateRetrySection();
+    if(b+concurrency<todo.length&&!stopFlag)await sleep(delay);
+  }
+
+  isRunning=false;
+  document.getElementById('startBtn').disabled=false;
+  document.getElementById('stopBtn').disabled=true;
+  const tq=Object.values(generatedData).reduce((s,a)=>s+a.length,0);
+  addLog(`━━━ DONE: ${Object.keys(generatedData).length} chapters · ${tq} questions ━━━`+(failedChapters.length>0?` · ${failedChapters.length} failed`:''),'head');
+  showDownload();checkResumeBanner();
+}
+
+// ══════════════════════════════════════════════════════════════
+// #4 — RETRY FAILED
+// ══════════════════════════════════════════════════════════════
+async function retryFailed(){
+  if(failedChapters.length===0)return;
+  if(isRunning){alert('Wait for current run to finish.');return;}
+  const apiKey=document.getElementById('apiKey').value.trim();
+  if(!apiKey){alert('Please enter your API key.');return;}
+  const provider=document.getElementById('provider').value;
+  const model=document.getElementById('customModel').value.trim()||PROVIDER_CONFIG[provider].model;
+  const maxRetries=parseInt(document.getElementById('retries').value);
+  const valMode=document.getElementById('validationMode').value;
+
+  const toRetry=[...failedChapters];
+  failedChapters=[];
+  isRunning=true;stopFlag=false;
+  document.getElementById('startBtn').disabled=true;
+  document.getElementById('stopBtn').disabled=false;
+  addLog(`━━━ Retrying ${toRetry.length} failed chapters ━━━`,'warn');
+
+  for(const{ch}of toRetry){
+    if(stopFlag)break;
+    setStatus(ch.id,'running');
+    addLog(`Retrying ${ch.id}…`,'info');
+    const{questions,lastError}=await processChapter(ch,provider,apiKey,model,maxRetries,valMode,0);
+    if(!questions){
+      addLog(`  ${ch.id} still failed: ${lastError?.message}`,'error');
+      setStatus(ch.id,'failed');failedChapters.push({ch,error:lastError?.message});
+    } else {
+      generatedData[ch.id]=questions;lsSave(ch.id,questions);
+      addLog(`  ${ch.id} ✓ ${questions.length}Q`,'ok');setStatus(ch.id,'done',questions.length);
+    }
+    await sleep(1500);
+  }
+
+  isRunning=false;
+  document.getElementById('startBtn').disabled=false;
+  document.getElementById('stopBtn').disabled=true;
+  updateRetrySection();showDownload();checkResumeBanner();
+  addLog('Retry complete.','head');
+}
+
+function stopGeneration(){stopFlag=true;document.getElementById('stopBtn').disabled=true;addLog('Stop requested…','warn');}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ══════════════════════════════════════════════════════════════
+// DOWNLOAD
+// ══════════════════════════════════════════════════════════════
+function buildFinalJSON(){
+  const sm={};
+  for(const[chId,questions]of Object.entries(generatedData)){
+    const sk=Object.keys(SUBJECTS).find(k=>chId.startsWith(k));if(!sk)continue;
+    const subj=SUBJECTS[sk],ch=subj.chapters.find(c=>c.id===chId);
+    if(!sm[sk])sm[sk]={subject:subj.name,subject_code:subj.code,chapters:[]};
+    sm[sk].chapters.push({chapter_id:chId,chapter:ch?.name||chId,questions});
+  }
+  const tq=Object.values(sm).reduce((s,sub)=>s+sub.chapters.reduce((cs,c)=>cs+c.questions.length,0),0);
+  return{exam:'CUET UG 2026',authority:'NTA',marking_scheme:{correct:5,wrong:-1,unattempted:0},generated_on:new Date().toISOString(),total_questions:tq,subjects:Object.values(sm)};
+}
+function showDownload(){
+  const tq=Object.values(generatedData).reduce((s,a)=>s+a.length,0);if(tq===0)return;
+  document.getElementById('download-section').style.display='block';
+  document.getElementById('downloadMeta').textContent=`${Object.keys(generatedData).length} chapters · ${tq} questions · ${new Date().toLocaleString()}`+(failedChapters.length>0?` · ⚠ ${failedChapters.length} failed`:'');
+}
+function triggerDownload(content,filename,mime){
+  const blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+}
+function downloadJSON(){triggerDownload(JSON.stringify(buildFinalJSON(),null,2),'questions-all.json','application/json');}
+function downloadBySubject(){
+  const sm={};
+  for(const[chId,questions]of Object.entries(generatedData)){
+    const sk=Object.keys(SUBJECTS).find(k=>chId.startsWith(k));if(!sk)continue;
+    const subj=SUBJECTS[sk],ch=subj.chapters.find(c=>c.id===chId);
+    if(!sm[sk])sm[sk]={subject:subj.name,subject_code:subj.code,chapters:[]};
+    sm[sk].chapters.push({chapter_id:chId,chapter:ch?.name||chId,questions});
+  }
+  for(const[key,data]of Object.entries(sm))
+    triggerDownload(JSON.stringify(data,null,2),`cuet-${key.toLowerCase()}.json`,'application/json');
+}
+function showPreview(){
+  const data=buildFinalJSON(),win=window.open('','_blank');
+  const sample=data.subjects.flatMap(s=>s.chapters).flatMap(c=>c.questions).slice(0,15);
+  win.document.write(`<html><head><title>CUET Preview</title>
+  <style>body{background:#0a0a0f;color:#e8e8f0;font-family:monospace;padding:24px;max-width:860px;margin:0 auto}
+  h2{color:#f0c040;margin-bottom:16px}.q{background:#111118;border:1px solid #1e1e2e;border-radius:8px;padding:16px;margin:10px 0}
+  .meta{font-size:10px;color:#6060a0;margin-bottom:8px}
+  .passage{font-size:12px;color:#40c0f0;background:#06060c;padding:10px;border-radius:4px;margin-bottom:10px;border-left:2px solid #40c0f0;white-space:pre-wrap}
+  .opt{color:#40c0f0;display:inline-block;margin:2px 8px 2px 0}.ans{color:#40f0a0;font-weight:bold}
+  .exp{color:#6060a0;font-size:12px;margin-top:10px;border-top:1px solid #1e1e2e;padding-top:8px}</style>
+  </head><body><h2>CUET 2026 — Preview (first 15 questions)</h2>`);
+  for(const q of sample){
+    win.document.write(`<div class="q"><div class="meta">[${q.id}] ${q.type} · ${q.level} · ${q.difficulty} · ${q.subtopic||'—'}</div>
+    ${q.passage?`<div class="passage">${q.passage.replace(/</g,'&lt;')}</div>`:''}
+    <strong>${q.question.replace(/</g,'&lt;')}</strong><br><br>
+    ${q.options.map((o,i)=>`<span class="${i===q.correct?'ans':'opt'}">(${String.fromCharCode(65+i)}) ${o.replace(/</g,'&lt;')}</span>`).join(' ')}
+    <div class="exp">✦ ${q.explanation.replace(/</g,'&lt;')}</div></div>`);
+  }
+  win.document.write(`<p style="color:#6060a0;margin-top:20px">Total: ${data.total_questions}Q · ${data.subjects.length} subjects</p></body></html>`);
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+function init(){
+  buildSubjectGrid();buildChapterList();
+  generatedData=lsLoad();
+  updateTokenEstimate();checkResumeBanner();
+  updateSelBtnStates();
+}
+init();
+</script>
+</body>
+</html>
